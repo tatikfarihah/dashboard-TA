@@ -7,6 +7,7 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from sklearn.metrics import mean_absolute_percentage_error
 import matplotlib.pyplot as plt
 import uuid
+from PIL import Image
 
 # Initialize session state for model-related variables
 if 'model' not in st.session_state:
@@ -162,10 +163,10 @@ def build_and_train_model_analisys():
 def bitcoin_info_menu():
     st.subheader("Selamat Datang di Aplikasi Prediksi Harga Bitcoin")
 
-    st.write("Aplikasi ini dirancang untuk membantu Anda memprediksi pergerakan harga Bitcoin dengan lebih efektif. Dengan menggunakan teknologi Long Short Term Memory Network, Anda dapat memperoleh wawasan yang lebih mendalam untuk memaksimalkan strategi investasi Anda. Aplikasi ini juga memungkinkan Anda untuk memvisualisasikan tren harga historis yang membantu Anda dalam pengambilan keputusan yang lebih baik.")
-    st.write("Saya berharap aplikasi ini dapat memberikan Anda manfaat yang optimal dalam memahami dan memantau pergerakan pasar. Selamat menggunakan, dan semoga keputusan investasi Crypto Anda semakin sukses! ")
+    st.write("Aplikasi ini dirancang untuk membantu Anda memprediksi pergerakan harga Bitcoin secara efektif. Dengan memanfaatkan teknologi Long Short Term Memory Network (LSTM), aplikasi ini menganalisis faktor internal dan eksternal yang memengaruhi harga Bitcoin. Selain itu, Anda dapat memvisualisasikan tren harga historis yang mendukung pengambilan keputusan yang lebih baik.")
+    st.write("Semoga aplikasi ini membantu Anda memahami dan memantau pergerakan pasar, serta mendukung kesuksesan dalam investasi kripto. Selamat menggunakan!")
 
-    st.write("Regards, ","\n Tatik Farihatul Farihah")
+    st.write("Salam, ","\n Tatik Farihatul Farihah")
     # st.write("Tatik Farihatul Farihah")
 
 def prediksi_dashboard_menu():
@@ -263,6 +264,7 @@ def analysis_data_menu():
     
     # Input file CSV atau Excel    
     uploaded_file = st.file_uploader("Upload file CSV atau Excel berisi data", type=["csv", "xlsx"])
+    st.write("pastikan nama kolom berupa \"Gold Price\", dll. ")
     
     
     if uploaded_file is not None:
@@ -314,10 +316,19 @@ def analysis_data_menu():
 
 def profile_menu():
     st.title("Profile Penulis")
-    st.image("Foto_Tatik Farihatul Farihah.jpg", caption="Gambar.1 Profil Tatik Farihatul Farihah")
+    image = Image.open("Foto_Tatik Farihatul Farihah.jpg",)
+
+    width, height = image.size
+
+    resized_image = image.resize((width//4, height//4))
+    st.image(resized_image, caption="Gambar.1 Profil Tatik Farihatul Farihah", use_column_width=True)
     st.write("Penulis    : Tatik Farihatul Farihah")
     st.write("TTlahir    : Jombang, 23 Juni 2003")
     st.write("Departemen : Statistika Bisnis, ITS")
+    st.write("")
+
+    st.write("\n\"karena hidup ini perlu dinikmati dengan cara yang Allah ridhai\"")
+    st.write("-Tatik Farihatul Farihah")
 
 # Streamlit Sidebar untuk Navigasi
 st.sidebar.title("Drawer Menu")
