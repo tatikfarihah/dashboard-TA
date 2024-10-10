@@ -16,6 +16,16 @@ if 'testPredict' not in st.session_state:
 if 'testY_actual' not in st.session_state:
     st.session_state.testY_actual = None
 
+if 'model2' not in st.session_state:
+    st.session_state.model2 = None
+if 'testPredict2' not in st.session_state:
+    st.session_state.testPredict2 = None
+if 'testY_actual2' not in st.session_state:
+    st.session_state.testY_actual2 = None
+
+if 'variabel_prediksi' not in st.session_state:
+    st.session_state.variabel_prediksi = None 
+
 # Fungsi untuk membuat dataset dengan look_back
 def create_dataset(X, Y, look_back=1):
     Xs, Ys = [], [] 
@@ -23,6 +33,12 @@ def create_dataset(X, Y, look_back=1):
         Xs.append(X[i:(i + look_back)])
         Ys.append(Y[i + look_back])
     return np.array(Xs), np.array(Ys)
+
+def create_dataset2(X, look_back=1):
+    Xs = []
+    for i in range(len(X) - look_back):
+        Xs.append(X[i:(i + look_back)])
+    return np.array(Xs)
 
 # Model LSTM
 def build_lstm_model(input_shape, units, dropout):
@@ -105,6 +121,52 @@ def build_and_train_model():
     st.session_state.testPredict = scalerY.inverse_transform(testPredict_scaled)
     st.session_state.testY_actual = scalerY.inverse_transform(testY_selected)
 
+def build_and_train_model_analisys():
+    st.session_state.model2 = None
+    st.session_state.testY_actual2 = None
+    st.session_state.testPredict2 = None
+
+    # Get selected features from session state
+    data2X = st.session_state.df_analisys[st.session_state.selected_analisys_vars].values  # Semua kecuali kolom target
+    data2Y = st.session_state.df_analisys[st.session_state.variabel_prediksi].values.reshape(-1, 1)  # Kolom target
+    print(data2X.shape)
+
+    # Preprocessing: Standarisasi data
+    scaler2X = StandardScaler()
+    data2X_scaled = scaler2X.fit_transform(data2X)
+    scaler2Y = StandardScaler()
+    data2Y_scaled = scaler2Y.fit_transform(data2Y)
+
+    # Membuat dataset untuk model
+    look_back = 1
+    data2X_prepared = create_dataset2(data2X_scaled, look_back)
+    data2Y_prepared = data2Y_scaled[look_back:]
+    
+    # Reshape input menjadi [samples, time steps, features]
+    data2X_prepared = data2X_prepared.reshape(data2X_prepared.shape[0], look_back, len(st.session_state.selected_analisys_vars))
+    
+    # Split data ke train dan test
+    train_size = int(len(data2X_prepared) * 0.8)
+    trainX, testX = data2X_prepared[:train_size], data2X_prepared[train_size:]
+    trainY, testY = data2Y_prepared[:train_size], data2Y_prepared[train_size:]
+    
+    # Membangun dan melatih model LSTM
+    st.session_state.model2 = build_lstm_model((look_back, len(st.session_state.selected_analisys_vars)), units=100, dropout=0.3)
+    st.session_state.model2.fit(trainX, trainY, epochs=50, batch_size=16, verbose=0, shuffle=False)
+    
+    # Prediksi menggunakan data testing
+    predicted_scaled = st.session_state.model2.predict(testX)
+    st.session_state.testPredict2 = scaler2Y.inverse_transform(predicted_scaled)
+    st.session_state.testY_actual2 = scaler2Y.inverse_transform(testY)
+
+def bitcoin_info_menu():
+    st.subheader("Selamat Datang di Aplikasi Prediksi Harga Bitcoin")
+
+    st.write("Aplikasi ini dirancang untuk membantu Anda memprediksi pergerakan harga Bitcoin dengan lebih efektif. Dengan menggunakan teknologi Long Short Term Memory Network, Anda dapat memperoleh wawasan yang lebih mendalam untuk memaksimalkan strategi investasi Anda. Aplikasi ini juga memungkinkan Anda untuk memvisualisasikan tren harga historis yang membantu Anda dalam pengambilan keputusan yang lebih baik.")
+    st.write("Saya berharap aplikasi ini dapat memberikan Anda manfaat yang optimal dalam memahami dan memantau pergerakan pasar. Selamat menggunakan, dan semoga keputusan investasi Crypto Anda semakin sukses! ")
+
+    st.write("Regards, ","\n Tatik Farihatul Farihah")
+    # st.write("Tatik Farihatul Farihah")
 
 def prediksi_dashboard_menu():
     # Dashboard menggunakan Streamlit
@@ -196,87 +258,76 @@ def prediksi_dashboard_menu():
 def analysis_data_menu():
     st.title("Analisis Data Harga Bitcoin Menggunakan LSTM")
     
-    # Variabel input yang diperlukan
-    st.header('Pilih Variabel Input')
-    input_vars = ['Gold Price', 'Nasdaq', 'S&P 500', 'Bitcoin Volume', 'Bitcoin Price']
-    
-    # Memilih variabel input
-    selected_vars = st.multiselect('Pilih variabel input', input_vars)
-    
     # Instruksi pengguna untuk mengunggah data
     st.write("Silakan unggah file CSV atau Excel berisi data dengan kolom yang sesuai.")
     
-    # Input file CSV atau Excel
+    # Input file CSV atau Excel    
     uploaded_file = st.file_uploader("Upload file CSV atau Excel berisi data", type=["csv", "xlsx"])
     
-    if uploaded_file is not None:
-        # Membaca file yang diunggah pengguna
-        try:
-            if uploaded_file.name.endswith('.csv'):
-                df = pd.read_csv(uploaded_file)
-            else:
-                df = pd.read_excel(uploaded_file)
-            
-            st.write("Data yang diunggah:")
-            st.write(df)
-            
-            # Memastikan kolom yang dipilih ada di data
-            if all(var in df.columns for var in selected_vars):
-                # Mengambil data sesuai variabel yang dipilih
-                dataX = df[selected_vars[:-1]].values  # Semua kecuali kolom target
-                dataY = df[selected_vars[-1]].values.reshape(-1, 1)  # Kolom target
-
-                # Preprocessing: Standarisasi data
-                scalerX = StandardScaler()
-                dataX_scaled = scalerX.fit_transform(dataX)
-                scalerY = StandardScaler()
-                dataY_scaled = scalerY.fit_transform(dataY)
-
-                # Membuat dataset untuk model
-                look_back = 1
-                dataX_prepared = create_dataset(dataX_scaled, look_back)
-                dataY_prepared = dataY_scaled[look_back:]
-                
-                # Reshape input menjadi [samples, time steps, features]
-                dataX_prepared = dataX_prepared.reshape(dataX_prepared.shape[0], look_back, len(selected_vars) - 1)
-                
-                # Split data ke train dan test
-                train_size = int(len(dataX_prepared) * 0.8)
-                trainX, testX = dataX_prepared[:train_size], dataX_prepared[train_size:]
-                trainY, testY = dataY_prepared[:train_size], dataY_prepared[train_size:]
-                
-                # Membangun dan melatih model LSTM
-                model = build_lstm_model((look_back, len(selected_vars) - 1), units=100, dropout=0.3)
-                model.fit(trainX, trainY, epochs=50, batch_size=16, verbose=0, shuffle=False)
-                
-                # Prediksi menggunakan data testing
-                predicted_scaled = model.predict(testX)
-                predicted_prices = scalerY.inverse_transform(predicted_scaled)
-                actual_prices = scalerY.inverse_transform(testY)
-                
-                # Tampilkan hasil prediksi
-                st.subheader("Grafik Prediksi vs Data Aktual")
-                plot_predictions(actual_prices, predicted_prices)
-            
-            else:
-                st.error("Kolom yang diperlukan tidak ditemukan pada file yang diunggah.")
-        
-        except Exception as e:
-            st.error(f"Terjadi kesalahan dalam membaca file: {e}")
     
-    else:
-        st.write("Silakan unggah file dengan kolom yang sesuai.")
+    if uploaded_file is not None:
+        if uploaded_file.name.endswith('.csv'):
+            st.session_state.df_analisys = pd.read_csv(uploaded_file)
+        else:
+            st.session_state.df_analisys = pd.read_excel(uploaded_file)
+        
+        st.write("Data yang diunggah:")
+        st.write(st.session_state.df_analisys)
+
+        input_vars = st.session_state.df_analisys.columns.to_list()
+    
+    if uploaded_file is not None:
+    # Memilih variabel input
+        st.subheader('Pilih Variable untuk Diprediksi')
+        st.selectbox('Pilih Variable Prediksi', input_vars, key='variabel_prediksi')
+
+        input_vars = [x for x in input_vars if x != st.session_state.variabel_prediksi]
+    
+    if st.session_state.variabel_prediksi is not None:
+
+        st.subheader('Pilih Variable untuk Input')
+        st.multiselect("Pilih Variable Input", input_vars, key='selected_analisys_vars', on_change=build_and_train_model_analisys)
+        # Membaca file yang diunggah pengguna
+        
+    if st.session_state.testY_actual2 is not None and st.session_state.testPredict2 is not None:
+        st.subheader("Grafik Prediksi vs Data Aktual")
+        plot_predictions(st.session_state.testY_actual2, st.session_state.testPredict2)
+
+    #     try:
+           
+            
+            
+            
+    #         # Memastikan kolom yang dipilih ada di data
+    #         if all(var in st.session_state.df_analisys.columns for var in st.session_state.selected_analisys_vars):
+                
+    #             # Tampilkan hasil prediksi
+                
+    #         else:
+    #             st.error("Kolom yang diperlukan tidak ditemukan pada file yang diunggah.")
+        
+    #     except Exception as e:
+    #         st.error(f"Terjadi kesalahan dalam membaca file: {e}")
+    
+    # else:
+    #     st.write("Silakan unggah file dengan kolom yang sesuai.")
+
+def profile_menu():
+    st.title("Profile Penulis")
+    st.image("Foto_Tatik Farihatul Farihah.jpg", caption="Gambar.1 Profil Tatik Farihatul Farihah")
+    st.write("Penulis    : Tatik Farihatul Farihah")
+    st.write("TTlahir    : Jombang, 23 Juni 2003")
+    st.write("Departemen : Statistika Bisnis, ITS")
 
 # Streamlit Sidebar untuk Navigasi
 st.sidebar.title("Drawer Menu")
-option = st.sidebar.selectbox('Pilih opsi dari drawer', ['Home', 'Dashboard', 'Analisis Data', 'Profil'])
+option = st.sidebar.selectbox('Pilih opsi dari drawer', ['Home', 'Dashboard', 'Analisis Data', 'Profile'])
 
 st.sidebar.write("Opsi yang dipilih:", option)
 
 # Menampilkan konten sesuai pilihan user
 if option == 'Home':
-    st.title("Informasi tentang Aplikasi")
-    st.write("Selamat datang di aplikasi prediksi harga Bitcoin!")
+    bitcoin_info_menu()
 
 elif option == 'Dashboard':
     prediksi_dashboard_menu()
@@ -285,8 +336,7 @@ elif option == 'Analisis Data':
     analysis_data_menu()  # Panggil fungsi submenu analisis data
 
 elif option == 'Profile':
-    st.title("Profil Penulis")
-    st.write("Ini adalah halaman tentang Penulis.")
+    profile_menu()
 
 # cara run nya   --streamlit run ./dashboard.py--
 # semangat semhasnya hehehe
