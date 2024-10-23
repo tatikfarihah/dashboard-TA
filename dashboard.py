@@ -290,8 +290,8 @@ def analysis_data_menu():
         else :
             st.session_state.variabel_prediksi = 'Harga Bitcoin'
 
-    var_x = ["Harga Emas", "Nasdaq", "S&P 500", "Volume Bitcoin", "Harga Bitcoin t-1"]
-    input_vars = [x for x in input_vars if x in var_x]
+        var_x = ["Harga Emas", "Nasdaq", "S&P 500", "Volume Bitcoin", "Harga Bitcoin t-1"]
+        input_vars = [x for x in input_vars if x in var_x]
     
     if st.session_state.variabel_prediksi is not None:
 
