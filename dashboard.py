@@ -223,7 +223,7 @@ def prediksi_dashboard_menu():
                 harga_btc_t1 = 0
 
             if 'Vol' in st.session_state.selected_features:
-                volume_btc = st.number_input('Volume Perdagangan Bitcoin', value=st.session_state.volume, format="%.2f")
+                volume_btc = st.number_input('Volume Bitcoin', value=st.session_state.volume, format="%.2f")
                 selected_indices[4] = True
             else:
                 volume_btc = 0
@@ -263,7 +263,7 @@ def prediksi_dashboard_menu():
             st.write(f"Prediksi Harga Bitcoin 1 Hari ke Depan: {next_prediction[0][0]:.2f}")
 
 def analysis_data_menu():
-    st.title("Analisis Data Harga Bitcoin Menggunakan LSTM")
+    st.title("Input Data Manual")
     
     # Instruksi pengguna untuk mengunggah data
     st.write("Silakan unggah file CSV atau Excel berisi data dengan kolom yang sesuai.")
