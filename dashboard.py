@@ -283,15 +283,15 @@ def analysis_data_menu():
 
         input_vars = st.session_state.df_analisys.columns.to_list()
     
-    if 'Harga Bitcoin' not in input_vars:
-    # Memilih variabel input
-        st.write('Variable Y tidak ditemukan')
-        
-    else :
-        st.session_state.variabel_prediksi = 'Harga Bitcoin'
+        if 'Harga Bitcoin' not in input_vars:
+        # Memilih variabel input
+            st.write('Variable Y tidak ditemukan')
+            
+        else :
+            st.session_state.variabel_prediksi = 'Harga Bitcoin'
 
-        var_x = ["Harga Emas", "Nasdaq", "S&P 500", "Volume Bitcoin", "Harga Bitcoin t-1"]
-        input_vars = [x for x in input_vars if x in var_x]
+            var_x = ["Harga Emas", "Nasdaq", "S&P 500", "Volume Bitcoin", "Harga Bitcoin t-1"]
+            input_vars = [x for x in input_vars if x in var_x]
     
     if st.session_state.variabel_prediksi is not None:
 
