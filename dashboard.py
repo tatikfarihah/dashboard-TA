@@ -26,6 +26,8 @@ if 'testY_actual2' not in st.session_state:
 
 if 'variabel_prediksi' not in st.session_state:
     st.session_state.variabel_prediksi = None 
+if 'selected_analisys_vars' not in st.session_state:
+    st.session_state.selected_analisys_vars = []
 
 # Fungsi untuk membuat dataset dengan look_back
 def create_dataset(X, Y, look_back=1):
