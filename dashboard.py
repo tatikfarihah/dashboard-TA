@@ -270,8 +270,6 @@ def analysis_data_menu():
     uploaded_file = st.file_uploader("Upload file CSV atau Excel berisi data", type=["csv", "xlsx"], on_change=file_changed)
     st.write("pastikan nama kolom berupa \"Harga Emas\", \"Nasdaq\", \"S&P 500\", \"Volume Bitcoin\", atau \"Harga Bitcoin t-1\"." )
     
-    input_vars = []
-    
     if uploaded_file is not None:
         if uploaded_file.name.endswith('.csv'):
             st.session_state.df_analisys = pd.read_csv(uploaded_file)
