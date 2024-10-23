@@ -294,7 +294,7 @@ def analysis_data_menu():
     if st.session_state.variabel_prediksi is not None:
 
         st.subheader('Pilih Variable untuk Input')
-        st.write(input_vars)
+        print(input_vars)
         st.multiselect("Pilih Variable Input", input_vars, key='selected_analisys_vars', on_change=build_and_train_model_analisys)
         # Membaca file yang diunggah pengguna
         
