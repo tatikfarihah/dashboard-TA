@@ -281,7 +281,7 @@ def analysis_data_menu():
         st.write("Data yang diunggah:")
         st.write(st.session_state.df_analisys)
 
-        input_vars = st.session_state.df_analisys.columns.to_list()
+        input_vars = [str(col) for col in st.session_state.df_analisys.columns if isinstance(col, str)]
     
         if 'Harga Bitcoin' not in input_vars:
         # Memilih variabel input
