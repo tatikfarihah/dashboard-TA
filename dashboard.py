@@ -160,6 +160,10 @@ def build_and_train_model_analisys():
     st.session_state.testPredict2 = scaler2Y.inverse_transform(predicted_scaled)
     st.session_state.testY_actual2 = scaler2Y.inverse_transform(testY)
 
+def file_changed():
+    st.session_state.variabel_prediksi = None
+    st.session_state.selected_analisys_vars = None
+
 def bitcoin_info_menu():
     st.subheader("Selamat Datang di Aplikasi Prediksi Harga Bitcoin")
 
@@ -223,13 +227,13 @@ def prediksi_dashboard_menu():
                 volume_btc = 0
 
             if 'Nasdaq' in st.session_state.selected_features:
-                nasdaq = st.number_input('Valuasi Nasdaq', value=st.session_state.nasdaq, format="%.2f")
+                nasdaq = st.number_input('Nasdaq', value=st.session_state.nasdaq, format="%.2f")
                 selected_indices[1] = True
             else:
                 nasdaq = 0
 
             if 'Harga_Emas' in st.session_state.selected_features:
-                harga_emas = st.number_input('Harga Pasar Emas', value=st.session_state.harga_emas, format="%.2f")
+                harga_emas = st.number_input('Harga Emas', value=st.session_state.harga_emas, format="%.2f")
                 selected_indices[0] = True
             else:
                 harga_emas = 0
@@ -263,8 +267,8 @@ def analysis_data_menu():
     st.write("Silakan unggah file CSV atau Excel berisi data dengan kolom yang sesuai.")
     
     # Input file CSV atau Excel    
-    uploaded_file = st.file_uploader("Upload file CSV atau Excel berisi data", type=["csv", "xlsx"])
-    st.write("pastikan nama kolom berupa \"Gold Price\", dll. ")
+    uploaded_file = st.file_uploader("Upload file CSV atau Excel berisi data", type=["csv", "xlsx"], on_change=file_changed)
+    st.write("pastikan nama kolom berupa \"Harga Emas\", \"Nasdaq\", \"S&P 500\", \"Volume Bitcoin\", atau \"Harga Bitcoin t-1\"." )
     
     
     if uploaded_file is not None:
@@ -278,12 +282,15 @@ def analysis_data_menu():
 
         input_vars = st.session_state.df_analisys.columns.to_list()
     
-    if uploaded_file is not None:
+    if 'Harga Bitcoin' not in input_vars:
     # Memilih variabel input
-        st.subheader('Pilih Variable untuk Diprediksi')
-        st.selectbox('Pilih Variable Prediksi', input_vars, key='variabel_prediksi')
+        st.write('Variable Y tidak ditemukan')
+        
+    else :
+        st.session_state.variabel_prediksi = 'Harga Bitcoin'
 
-        input_vars = [x for x in input_vars if x != st.session_state.variabel_prediksi]
+        var_x = ["Harga Emas", "Nasdaq", "S&P 500", "Volume Bitcoin", "Harga Bitcoin t-1"]
+        input_vars = [x for x in input_vars if x in var_x]
     
     if st.session_state.variabel_prediksi is not None:
 
